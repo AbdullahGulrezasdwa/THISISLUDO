@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-
     <title>WM Ludo</title>
-    <script src="js/jquery.min.js"></script>
+
+    <!-- jQuery from CDN (no need for local jquery.min.js) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+
+    <!-- Your stylesheet -->
     <link href="css/StyleSheet.css" rel="stylesheet" />
-    
 </head>
 <body>
-
 
     <div id="ludo_main">
         <div class="ludo_screen_conent">
@@ -57,11 +60,8 @@
 
             <!-- ludo Mid-->
             <div class="ludo_d_mid">
-
                 <div class="ludomids ludo_d_mid_box_left players_path ">
                     <div class="ludo_d_mid_box_clmn_m column_main">
-
-
                         <div class="column " id="t13"></div>
                         <div class="column safe" id="t14"></div>
                         <div class="column " id="t15"></div>
@@ -84,11 +84,10 @@
                         <div class="column " id="t6"></div>
                     </div>
                 </div>
-                <div id="EndSteps" class="ludomids finalStage_main ">
+                <div id="EndSteps" class="ludomids finalStage_main">
                 </div>
                 <div class="ludomids ludo_d_mid_box_right players_path ">
                     <div class="ludo_d_mid_box_clmn_m column_main">
-
                         <div class="column " id="t32"></div>
                         <div class="column " id="t33"></div>
                         <div class="column " id="t34"></div>
@@ -109,7 +108,6 @@
                         <div class="column " id="t39"></div>
                     </div>
                 </div>
-
             </div>
 
             <!-- ludo Bottom-->
@@ -120,7 +118,6 @@
                         <span class="bg-circle"><i class="kati bl" id="bl2"></i></span>
                         <span class="bg-circle"><i class="kati bl" id="bl3"></i></span>
                         <span class="bg-circle"><i class="kati bl" id="bl4"></i></span>
-
                     </div>
                 </div>
                 <div class="ludo_d_bottom_box players_path ludotops">
@@ -156,24 +153,15 @@
             </div>
         </div>
 
-        <div class="ludu_passas" data-chal-count="6">
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-            <span></span>
-            <span></span>
-            <span></span>
-
+        <!-- Dice -->
+        <div class="ludu_passas" id="dice" data-chal-count="6">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
         </div>
     </div>
 
-<script src="js/ludo.js"></script>
-
+    <!-- Your game logic -->
+    <script src="js/ludo.js"></script>
 </body>
 </html>
