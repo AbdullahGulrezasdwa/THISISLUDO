@@ -30,8 +30,6 @@ body::after {
     /* remove any transform/scale you had before */
     transform: none;
 }
-;
-}
 
 /* PLAYER HOMES */
 .player_board {
