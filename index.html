@@ -1,110 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>THIS IS LUDO</title>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-            crossorigin="anonymous"></script>
-
-    <!-- Styles -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Game</title>
     <link rel="stylesheet" href="css/StyleSheet.css">
 </head>
 <body>
 
-<div id="ludo_main">
+    <div class="main-container">
+        <div class="game-board" id="board">
+            <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
+            
+            <div class="piece red" id="r0" data-color="red" data-index="0" onclick="handlePieceClick('red', 0)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r1" data-color="red" data-index="1" onclick="handlePieceClick('red', 1)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r2" data-color="red" data-index="2" onclick="handlePieceClick('red', 2)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r3" data-color="red" data-index="3" onclick="handlePieceClick('red', 3)"><img src="images/rd_kati.png"></div>
 
-    <!-- Board image -->
-    <div class="board-wrapper">
-        <img src="images/board.jpg" alt="Ludo Board" class="board-img">
+            <div class="piece green" id="g0" data-color="green" data-index="0" onclick="handlePieceClick('green', 0)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g1" data-color="green" data-index="1" onclick="handlePieceClick('green', 1)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g2" data-color="green" data-index="2" onclick="handlePieceClick('green', 2)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g3" data-color="green" data-index="3" onclick="handlePieceClick('green', 3)"><img src="images/gn_kati.png"></div>
 
-        <!-- 15x15 overlay grid -->
-        <div class="board-grid">
+            <div class="piece yellow" id="y0" data-color="yellow" data-index="0" onclick="handlePieceClick('yellow', 0)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y1" data-color="yellow" data-index="1" onclick="handlePieceClick('yellow', 1)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y2" data-color="yellow" data-index="2" onclick="handlePieceClick('yellow', 2)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y3" data-color="yellow" data-index="3" onclick="handlePieceClick('yellow', 3)"><img src="images/yl_kati.png"></div>
 
-            <!-- Bottom row (blue side) – t1 at bottom-left, going right -->
-            <div class="cell debug" id="t1"></div>
-            <div class="cell debug" id="t2"></div>
-            <div class="cell debug" id="t3"></div>
-            <div class="cell debug" id="t4"></div>
-            <div class="cell debug" id="t5"></div>
-            <div class="cell debug" id="t6"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
-            <div class="cell debug"></div>
+            <div class="piece blue" id="b0" data-color="blue" data-index="0" onclick="handlePieceClick('blue', 0)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b1" data-color="blue" data-index="1" onclick="handlePieceClick('blue', 1)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b2" data-color="blue" data-index="2" onclick="handlePieceClick('blue', 2)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b3" data-color="blue" data-index="3" onclick="handlePieceClick('blue', 3)"><img src="images/bl_kati.png"></div>
+        </div>
 
-            <!-- You would continue filling the 15x15 grid row by row,
-                 placing your existing IDs (t7, t8, …, t52, etc.)
-                 into the correct logical positions around the board.
-                 For now, we keep only the path IDs you already use,
-                 and the rest can stay as empty .cell debug divs. -->
-
+        <div class="controls">
+            <h2 id="turn-text" style="color: red;">Red's Turn</h2>
+            <div class="dice-container" onclick="rollDice()">
+                <img id="dice-img" src="images/dice1.png" alt="Dice">
+            </div>
+            <p>Click Dice to Roll</p>
         </div>
     </div>
 
-    <!-- Homes (kept separate so tokens don’t vanish) -->
-    <div class="homes">
+    <audio id="roll-sound" src="roll.mp3"></audio>
 
-        <!-- Red home (top-left) -->
-        <div class="player_board plyr_top_1" data-board-id="1">
-            <div class="player_board_white" data-kati-count="4">
-                <span class="bg-circle"><i class="kati rd" id="r1" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati rd" id="r2" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati rd" id="r3" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati rd" id="r4" data-step-count="0"></i></span>
-            </div>
-        </div>
-
-        <!-- Green home (top-right) -->
-        <div class="player_board plyr_top_2" data-board-id="2">
-            <div class="player_board_white" data-kati-count="4">
-                <span class="bg-circle"><i class="kati gn" id="g1" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati gn" id="g2" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati gn" id="g3" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati gn" id="g4" data-step-count="0"></i></span>
-            </div>
-        </div>
-
-        <!-- Blue home (bottom-left) -->
-        <div class="player_board plyr_top_3" data-board-id="3">
-            <div class="player_board_white" data-kati-count="4">
-                <span class="bg-circle"><i class="kati bl" id="bl1" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati bl" id="bl2" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati bl" id="bl3" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati bl" id="bl4" data-step-count="0"></i></span>
-            </div>
-        </div>
-
-        <!-- Yellow home (bottom-right) -->
-        <div class="player_board plyr_top_4" data-board-id="4">
-            <div class="player_board_white" data-kati-count="4">
-                <span class="bg-circle"><i class="kati yl" id="y1" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati yl" id="y2" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati yl" id="y3" data-step-count="0"></i></span>
-                <span class="bg-circle"><i class="kati yl" id="y4" data-step-count="0"></i></span>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Dice -->
-    <div class="ludu_passas" id="dice" data-chal-count="6">
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-    </div>
-
-</div>
-
-<!-- Game logic -->
-<script src="js/ludo.js"></script>
-
+    <script src="js/ludo.js"></script>
 </body>
 </html>
