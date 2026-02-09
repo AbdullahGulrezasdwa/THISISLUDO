@@ -1,46 +1,45 @@
 :root { --step-size: 6.666%; }
 
 body {
-    background-color: #121212;
+    background-color: #0f0f0f;
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: white;
     overflow: hidden;
 }
 
-.main-container {
-    width: 95vw;
-    max-width: 500px;
-}
+.main-container { width: 95vw; max-width: 500px; }
 
 .ui-panel {
-    background: #1e1e1e;
+    background: #1a1a1a;
     padding: 20px;
     border-radius: 15px;
     text-align: center;
     border: 1px solid #333;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 }
 
-#name-inputs input {
-    display: block; width: 90%; margin: 10px auto; padding: 12px;
-    border-radius: 6px; border: 1px solid #444; background: #2a2a2a; color: white;
+/* Status Dashboard */
+.status-board {
+    display: flex;
+    justify-content: space-around;
+    background: #1a1a1a;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    font-size: 0.8rem;
 }
+.stat-item { opacity: 0.5; transition: 0.3s; }
+.stat-item.active-player { opacity: 1; transform: scale(1.1); font-weight: bold; }
+.stat-item.unlocked { color: #2ecc71; opacity: 1; }
 
-.start-btn {
-    background: #e67e22; color: white; padding: 12px 30px;
-    border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;
-    transition: 0.2s;
-}
-
-.start-btn:hover { background: #d35400; }
-
-.game-board { position: relative; width: 100%; aspect-ratio: 1/1; }
-.board-bg { width: 100%; height: 100%; display: block; border: 2px solid #333; }
+.game-board { position: relative; width: 100%; aspect-ratio: 1/1; transition: transform 0.1s; }
+.board-bg { width: 100%; height: 100%; display: block; border: 2px solid #333; border-radius: 4px; }
 
 .piece {
     position: absolute; width: var(--step-size); height: var(--step-size);
@@ -48,7 +47,6 @@ body {
     display: flex; justify-content: center; align-items: center;
     cursor: pointer;
 }
-
 .piece img { width: 90%; height: 90%; object-fit: contain; }
 
 .highlight {
@@ -57,29 +55,24 @@ body {
     z-index: 200;
 }
 
-@keyframes bounce { from { transform: scale(1); } to { transform: scale(1.25); } }
+/* Pro Effects */
+.ghost { opacity: 0.4; pointer-events: none; filter: grayscale(50%); }
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px); }
+    25% { transform: translate(-3px, -2px); }
+    50% { transform: translate(3px, 2px); }
+    100% { transform: translate(0, 0); }
+}
+.shake { animation: shake 0.2s ease-in-out; }
+
+@keyframes bounce { from { transform: scale(1); } to { transform: scale(1.2); } }
 
 .dice-box {
-    width: 75px; height: 75px; background: white; margin: 10px auto;
-    border-radius: 12px; font-size: 55px; line-height: 75px; color: #333;
-    cursor: pointer; box-shadow: 0 5px 0 #999;
-    user-select: none;
+    width: 70px; height: 70px; background: white; margin: 10px auto;
+    border-radius: 12px; font-size: 50px; line-height: 70px; color: #333;
+    cursor: pointer; box-shadow: 0 5px 0 #bbb; user-select: none; transition: 0.1s;
 }
-
+.dice-box:active { transform: translateY(3px); box-shadow: 0 2px 0 #999; }
 .dice-rolling { animation: spin 0.1s infinite; pointer-events: none; }
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-
-#status-display { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
-#player-label { color: #888; margin-bottom: 10px; }
-/* Add to StyleSheet.css */
-
-/* Highlight pieces that have unlocked the home path */
-.piece.unlocked {
-    filter: drop-shadow(0 0 5px #2ecc71) brightness(1.2);
-}
-
-/* Style for the instruction when a warning pops up */
-#instruction {
-    transition: color 0.3s ease;
-    min-height: 1.2em;
-}
