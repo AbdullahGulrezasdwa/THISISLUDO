@@ -2,29 +2,27 @@
    MODERN PREMIUM LUDO ENGINE
    =========================== */
 
-/* GLOBAL STATE */
-let currentPlayer = 1;          // 1=red, 2=green, 3=blue, 4=yellow
+let currentPlayer = 1;
 let diceValue = 0;
 let mustPlay = false;
 
 /* PLAYER CONFIG */
 const playerData = {
-    1: { color: "rd", start: "t14", entry: 1 },
-    2: { color: "gn", start: "t27", entry: 14 },
-    3: { color: "bl", start: "t1",  entry: 27 },
-    4: { color: "yl", start: "t40", entry: 40 }
+    1: { color: "rd", start: "t14" },
+    2: { color: "gn", start: "t27" },
+    3: { color: "bl", start: "t1"  },
+    4: { color: "yl", start: "t40" }
 };
 
 /* DICE CLICK */
 $("#dice").on("click", function () {
 
-    if (mustPlay) return; // must move before rolling again
+    if (mustPlay) return;
 
     diceValue = Math.floor(Math.random() * 6) + 1;
 
     $(this).attr("data-chal-count", diceValue);
 
-    // premium dice animation
     $(this).addClass("dice-anim");
     setTimeout(() => $(this).removeClass("dice-anim"), 450);
 
@@ -96,10 +94,8 @@ function moveOnBoard(token) {
 
     const newIndex = currentIndex + diceValue;
 
-    // remove from old cell
     $("#" + currentCell).children("#" + id).remove();
 
-    // choose path
     if (newSteps > 51) {
         $("#b" + newIndex).append(token);
     } else {
