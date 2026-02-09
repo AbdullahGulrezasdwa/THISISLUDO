@@ -1,96 +1,92 @@
+:root {
+    --step-size: 6.666%; /* 100/15 */
+}
+
 body {
-    background-color: #2c3e50;
-    font-family: Arial, sans-serif;
+    background-color: #1a252f;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .main-container {
+    width: 95vw;
+    max-width: 550px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 600px; /* Limits size on desktop */
+    gap: 20px;
 }
 
 .game-board {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1; /* Keeps it square */
-    background-color: white;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    aspect-ratio: 1/1;
+    background: #fff;
+    border: 5px solid #34495e;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-.board-bg {
-    width: 100%;
-    height: 100%;
-}
+.board-bg { width: 100%; height: 100%; display: block; }
 
 .piece {
     position: absolute;
-    width: 6.66%;  /* 1/15th of the board */
-    height: 6.66%;
-    z-index: 10;
-    transition: top 0.3s, left 0.3s;
-    cursor: pointer;
+    width: var(--step-size);
+    height: var(--step-size);
+    z-index: 100;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .piece img {
-    width: 80%; /* Slightly smaller than the square so it fits nicely */
-    height: auto;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+    width: 85%;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4));
 }
 
-/* Animation for movable pieces */
 .highlight {
-    animation: bounce 1s infinite;
-    filter: brightness(1.2);
+    animation: pulse 0.8s infinite alternate;
+    filter: brightness(1.3) contrast(1.2);
+    z-index: 101;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.3); }
 }
 
-.controls {
-    margin-top: 20px;
+.ui-panel {
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 15px;
     text-align: center;
     color: white;
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 10px;
-    width: 100%;
 }
 
-.dice-container img {
-    width: 60px;
-    cursor: pointer;
-    transition: transform 0.2s;
+#status-display {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-.dice-container img:active {
-    transform: rotate(360deg);
-}
 .dice-box {
-    font-size: 80px;        /* Makes the dice big */
-    line-height: 80px;
     width: 80px;
     height: 80px;
-    background-color: white;
-    border-radius: 15px;    /* Rounded corners */
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    background: white;
+    margin: 0 auto;
+    border-radius: 12px;
+    font-size: 60px;
+    line-height: 80px;
+    color: #333;
     cursor: pointer;
-    user-select: none;      /* Prevents highlighting text */
-    color: #333;            /* Dark grey dots */
+    box-shadow: inset 0 -5px 0 #ccc, 0 5px 15px rgba(0,0,0,0.3);
+    user-select: none;
 }
 
-.dice-box:active {
-    transform: scale(0.95); /* Click effect */
-}
+.dice-box:active { transform: translateY(3px); box-shadow: none; }
