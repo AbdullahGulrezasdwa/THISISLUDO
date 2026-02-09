@@ -55,3 +55,16 @@ body {
 .stat-item { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 10px; opacity: 0.5; }
 .active-player { opacity: 1; border: 1px solid gold; }
 .unlocked { color: #2ecc71; font-weight: bold; }
+#player-label {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: color 0.3s ease; /* Smooth color transition when turn changes */
+}
+
+#status-display {
+    font-weight: 800;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+}
