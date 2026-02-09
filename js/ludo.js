@@ -1,194 +1,244 @@
-$(function () {
+// --- Game State ---
+const players = ['red', 'green', 'yellow', 'blue'];
+let currentTurn = 0; // 0=Red, 1=Green, 2=Yellow, 3=Blue
+let diceValue = 0;
+let hasRolled = false;
 
-    /* ===========================
-       MODERN PREMIUM LUDO ENGINE
-       =========================== */
+// --- Coordinates Map (15x15 Grid) ---
+// Each step is [x, y] coordinates (0-14). 
+// 0,0 is Top-Left. 14,14 is Bottom-Right.
+// This path is the "Outer Loop" of 52 squares.
+const mainPath = [
+    [1,6], [2,6], [3,6], [4,6], [5,6], // Red Home Strip
+    [6,5], [6,4], [6,3], [6,2], [6,1], [6,0], // Up Top Left
+    [7,0], [8,0], // Top Middle Turn
+    [8,1], [8,2], [8,3], [8,4], [8,5], // Down Top Right
+    [9,6], [10,6], [11,6], [12,6], [13,6], [14,6], // Right Strip
+    [14,7], [14,8], // Right Middle Turn
+    [13,8], [12,8], [11,8], [10,8], [9,8], // Left Strip (Green Side)
+    [8,9], [8,10], [8,11], [8,12], [8,13], [8,14], // Down Bottom Right
+    [7,14], [6,14], // Bottom Middle Turn
+    [6,13], [6,12], [6,11], [6,10], [6,9], // Up Bottom Left
+    [5,8], [4,8], [3,8], [2,8], [1,8], [0,8], // Left Strip
+    [0,7] // Back to Start
+];
 
-    let currentPlayer = 1;
-    let diceValue = 0;
-    let mustPlay = false;
+// Starting indices for each color on the mainPath
+const startIndices = {
+    'red': 0,      // Index 0 in mainPath
+    'green': 13,   // Index 13 in mainPath
+    'yellow': 26,  // Index 26 in mainPath
+    'blue': 39     // Index 39 in mainPath
+};
 
-    /* PLAYER CONFIG */
-    const playerData = {
-        1: { color: "rd", start: "t14", homeSelector: '.plyr_top_1 .player_board_white' },
-        2: { color: "gn", start: "t27", homeSelector: '.plyr_top_2 .player_board_white' },
-        3: { color: "bl", start: "t1",  homeSelector: '.plyr_top_3 .player_board_white' },
-        4: { color: "yl", start: "t40", homeSelector: '.plyr_top_4 .player_board_white' }
-    };
+// Base positions (Waiting area coordinates)
+const basePositions = {
+    'red': [[2,2], [2,3], [3,2], [3,3]],
+    'green': [[2,11], [2,12], [3,11], [3,12]],
+    'yellow': [[11,11], [11,12], [12,11], [12,12]],
+    'blue': [[11,2], [11,3], [12,2], [12,3]]
+};
 
-    /* ===========================
-       DICE DOT UPDATE FUNCTION
-       =========================== */
-    function updateDiceDots(num) {
-        const dots = $("#dice span");
-        dots.removeClass("active");
+// Home Run Paths (The final stretch into center)
+const homePaths = {
+    'red': [[1,7], [2,7], [3,7], [4,7], [5,7], [6,7]],
+    'green': [[7,1], [7,2], [7,3], [7,4], [7,5], [7,6]],
+    'yellow': [[13,7], [12,7], [11,7], [10,7], [9,7], [8,7]],
+    'blue': [[7,13], [7,12], [7,11], [7,10], [7,9], [7,8]]
+};
 
-        const patterns = {
-            1: [4],
-            2: [0, 8],
-            3: [0, 4, 8],
-            4: [0, 2, 6, 8],
-            5: [0, 2, 4, 6, 8],
-            6: [0, 2, 3, 5, 6, 8]
-        };
+// Current positions of all pieces: -1 means in base, 0-51 is main path, 100+ is home path
+let pieceState = {
+    'red': [-1, -1, -1, -1],
+    'green': [-1, -1, -1, -1],
+    'yellow': [-1, -1, -1, -1],
+    'blue': [-1, -1, -1, -1]
+};
 
-        patterns[num].forEach(i => dots.eq(i).addClass("active"));
-    }
+// Safe spots (Stars/Globs) - indices on mainPath
+const safeSpots = [0, 8, 13, 21, 26, 34, 39, 47];
 
-    /* ===========================
-       DICE CLICK
-       =========================== */
-    $("#dice").on("click", function () {
+// --- Initialization ---
+function initGame() {
+    renderBoard();
+    updateStatus();
+}
 
-        if (mustPlay) return;
+// Moves pieces visually to their coordinates
+function renderBoard() {
+    players.forEach(color => {
+        pieceState[color].forEach((pos, index) => {
+            const pieceEl = document.getElementById(`${color.charAt(0)}${index}`);
+            let coords;
 
-        diceValue = Math.floor(Math.random() * 6) + 1;
+            if (pos === -1) {
+                // In Base
+                coords = basePositions[color][index];
+            } else if (pos >= 100) {
+                // In Home Path
+                let homeIndex = pos - 100;
+                coords = homePaths[color][homeIndex];
+            } else {
+                // On Main Path
+                // Adjust for start index of that color
+                let actualIndex = (pos + startIndices[color]) % 52;
+                coords = mainPath[actualIndex];
+            }
 
-        $(this).attr("data-chal-count", diceValue);
-
-        updateDiceDots(diceValue);
-
-        $(this).addClass("dice-anim");
-        setTimeout(() => $(this).removeClass("dice-anim"), 450);
-
-        mustPlay = true;
-    });
-
-    /* ===========================
-       TOKEN CLICK
-       =========================== */
-    $("body").on("click", ".kati", function () {
-
-        if (!mustPlay) return;
-
-        const token = $(this);
-        const tokenColor = token.attr("class").split(" ")[1];
-        const playerColor = playerData[currentPlayer].color;
-
-        if (tokenColor !== playerColor) return;
-
-        moveToken(token);
-    });
-
-    /* ===========================
-       MOVE TOKEN
-       =========================== */
-    function moveToken(token) {
-
-        const parent = token.parent().parent();
-        const isHome = parseInt(parent.attr("data-kati-count") || "0") > 0;
-
-        if (isHome) {
-            openToken(token);
-            return;
-        }
-
-        moveOnBoard(token);
-    }
-
-    /* ===========================
-       OPEN TOKEN FROM HOME
-       =========================== */
-    function openToken(token) {
-
-        const p = currentPlayer;
-        const home = token.parent().parent();
-        let count = parseInt(home.attr("data-kati-count") || "0");
-
-        if (count <= 0) return;
-
-        const startCell = playerData[p].start;
-
-        $("#" + startCell).append(token.attr("data-step-count", 1));
-
-        count--;
-        home.attr("data-kati-count", count);
-
-        mustPlay = false;
-        nextTurn();
-    }
-
-    /* ===========================
-       MOVE TOKEN ON BOARD (WITH KILL SYSTEM)
-       =========================== */
-    function moveOnBoard(token) {
-
-        const id = token.attr("id");
-        const currentCell = token.parent().attr("id");
-        const currentIndex = parseInt(currentCell.match(/\d+/)[0]);
-        let steps = parseInt(token.attr("data-step-count") || "0");
-
-        const newSteps = steps + diceValue;
-
-        if (newSteps > 56) {
-            console.log("Illegal move: cannot exceed final.");
-            return;
-        }
-
-        const newIndex = currentIndex + diceValue;
-        const targetId = (newSteps > 51 ? "b" : "t") + newIndex;
-
-        // remove from old cell
-        $("#" + currentCell).children("#" + id).remove();
-
-        const $targetCell = $("#" + targetId);
-
-        // KILL SYSTEM: if not safe and opponent present
-        if (!$targetCell.hasClass("safe")) {
-            const enemyTokens = $targetCell.find(".kati").filter(function () {
-                const cls = $(this).attr("class").split(" ")[1];
-                return cls !== playerData[currentPlayer].color;
-            });
-
-            enemyTokens.each(function () {
-                sendTokenHome($(this));
-            });
-        }
-
-        // place moving token
-        $targetCell.append(token);
-        token.attr("data-step-count", newSteps);
-
-        mustPlay = false;
-        nextTurn();
-    }
-
-    /* ===========================
-       SEND TOKEN HOME AFTER KILL
-       =========================== */
-    function sendTokenHome($token) {
-
-        const cls = $token.attr("class").split(" ")[1]; // rd/gn/bl/yl
-        let playerIndex = null;
-
-        Object.keys(playerData).forEach(p => {
-            if (playerData[p].color === cls) playerIndex = parseInt(p);
+            // Convert Grid (0-14) to CSS Percentages
+            // 1 square = 6.66%
+            pieceEl.style.top = (coords[0] * 6.66) + '%';
+            pieceEl.style.left = (coords[1] * 6.66) + '%';
+            
+            // Clear highlights
+            pieceEl.classList.remove('highlight');
         });
+    });
+}
 
-        if (!playerIndex) return;
+// --- Dice Logic ---
+function rollDice() {
+    if (hasRolled) return; // Prevent double rolling
 
-        const homeSel = playerData[playerIndex].homeSelector;
-        const $home = $(homeSel);
-        let count = parseInt($home.attr("data-kati-count") || "0");
+    const rollSound = document.getElementById('roll-sound');
+    if(rollSound) rollSound.play().catch(() => {}); // Catch error if no sound file
 
-        // reset token
-        $token.attr("data-step-count", 0);
+    diceValue = Math.floor(Math.random() * 6) + 1;
+    document.getElementById('dice-img').src = `images/dice${diceValue}.png`;
+    
+    hasRolled = true;
+    checkPossibleMoves();
+}
 
-        // visually back to home (inside a bg-circle)
-        const wrapper = $("<span>").addClass("bg-circle");
-        wrapper.append($token);
-        $home.append(wrapper);
+// --- Move Logic ---
+function checkPossibleMoves() {
+    const color = players[currentTurn];
+    const positions = pieceState[color];
+    let possibleMoves = 0;
 
-        count++;
-        $home.attr("data-kati-count", count);
+    positions.forEach((pos, index) => {
+        const canMove = isValidMove(pos, diceValue);
+        if (canMove) {
+            document.getElementById(`${color.charAt(0)}${index}`).classList.add('highlight');
+            possibleMoves++;
+        }
+    });
+
+    // If no moves possible, skip turn
+    if (possibleMoves === 0) {
+        setTimeout(nextTurn, 1000);
+    }
+}
+
+function isValidMove(currentPos, steps) {
+    // Rule: Must roll 6 to leave base
+    if (currentPos === -1) {
+        return steps === 6;
+    }
+    // Rule: Cannot overshoot home (Goal is index 5 in home path)
+    if (currentPos >= 100) {
+        return (currentPos + steps) <= 105;
+    }
+    // Logic for entering home path
+    // The path length is 51. If pos + steps > 50, we might enter home.
+    // For simplicity here: standard path is 0-50 (51 steps). 
+    // Actual logic needs to track "steps taken" vs "grid index", but simpler approach:
+    // If steps + pos > 50, enter home path logic.
+    // (Note: This is a simplified logic. In full Ludo, we track 'steps moved' not just index)
+    
+    return true; 
+}
+
+function handlePieceClick(color, index) {
+    if (!hasRolled || players[currentTurn] !== color) return;
+
+    const currentPos = pieceState[color][index];
+    
+    if (isValidMove(currentPos, diceValue)) {
+        movePiece(color, index, diceValue);
+    }
+}
+
+function movePiece(color, index, steps) {
+    let currentPos = pieceState[color][index];
+
+    // 1. Move out of base
+    if (currentPos === -1) {
+        pieceState[color][index] = 0; // Move to start of path
+    } else {
+        // 2. Normal Move
+        // Check if we enter home path (Simple threshold for demo)
+        if (currentPos < 100 && currentPos + steps > 50) {
+            let overflow = (currentPos + steps) - 51;
+            pieceState[color][index] = 100 + overflow; // Enter home
+        } else if (currentPos >= 100) {
+            pieceState[color][index] += steps;
+        } else {
+            pieceState[color][index] += steps;
+        }
     }
 
-    /* ===========================
-       NEXT TURN
-       =========================== */
-    function nextTurn() {
-        currentPlayer++;
-        if (currentPlayer > 4) currentPlayer = 1;
+    // 3. Capture Logic
+    let landedPos = pieceState[color][index];
+    // Convert relative pos to global mainPath index for collision check
+    if (landedPos < 100 && landedPos !== -1) {
+        let globalIndex = (landedPos + startIndices[color]) % 52;
+        checkCollision(color, globalIndex);
     }
 
-});
+    renderBoard();
+    checkWin(color);
+    
+    // Rule: Rolling a 6 gives another turn
+    if (diceValue !== 6) {
+        nextTurn();
+    } else {
+        hasRolled = false; // Reset for extra roll
+        updateStatus("Roll again!");
+    }
+}
+
+function checkCollision(activeColor, globalIndex) {
+    // Don't capture on safe spots
+    if (safeSpots.includes(globalIndex)) return;
+
+    players.forEach(pColor => {
+        if (pColor === activeColor) return; // Don't capture self
+
+        pieceState[pColor].forEach((pos, pIndex) => {
+            if (pos !== -1 && pos < 100) {
+                let pGlobalIndex = (pos + startIndices[pColor]) % 52;
+                if (pGlobalIndex === globalIndex) {
+                    // CAPTURE! Send back to base
+                    pieceState[pColor][pIndex] = -1;
+                    console.log(`${pColor} piece captured!`);
+                }
+            }
+        });
+    });
+}
+
+function checkWin(color) {
+    // Check if all 4 pieces are at end of home path (index 105)
+    let wins = pieceState[color].filter(p => p === 105).length;
+    if (wins === 4) {
+        alert(`${color.toUpperCase()} WINS!`);
+        location.reload();
+    }
+}
+
+function nextTurn() {
+    currentTurn = (currentTurn + 1) % 4;
+    hasRolled = false;
+    updateStatus();
+}
+
+function updateStatus(msg) {
+    const color = players[currentTurn];
+    const text = document.getElementById('turn-text');
+    text.innerText = msg ? msg : `${color.toUpperCase()}'s Turn`;
+    text.style.color = color;
+}
+
+// Start
+initGame();
