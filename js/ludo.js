@@ -38,20 +38,37 @@ function startGame() {
     const container = document.getElementById('pieces-container');
     container.innerHTML = '';
 
+    // Mapping colors to your specific filenames
+    const colorMap = {
+        red: 'rd',
+        green: 'gn',
+        yellow: 'yl',
+        blue: 'bl'
+    };
+
     for (let i = 0; i < numPlayers; i++) {
         let name = document.getElementById(`p${i}-name`).value || players[i].toUpperCase();
         playerNames.push(name);
         
-        // Generate pieces for active players
         for (let j = 0; j < 4; j++) {
             const p = document.createElement('div');
             p.className = `piece ${players[i]}`;
             p.id = `${players[i][0]}${j}`;
             p.onclick = () => handlePieceClick(players[i], j);
-            p.innerHTML = `<img src="images/${players[i].substring(0,2)}_kati.png">`;
+            
+            // Fixed the path to match your actual filenames (rd, gn, yl, bl)
+            const filePrefix = colorMap[players[i]];
+            p.innerHTML = `<img src="images/${filePrefix}_kati.png" alt="${players[i]}">`;
+            
             container.appendChild(p);
         }
     }
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'block';
+    render();
+    updateUI();
+}
 
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'block';
@@ -166,3 +183,4 @@ function render() {
         });
     });
 }
+
