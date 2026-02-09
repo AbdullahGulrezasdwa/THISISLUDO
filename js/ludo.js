@@ -101,10 +101,17 @@ function rollDice() {
     if (hasRolled) return; // Prevent double rolling
 
     const rollSound = document.getElementById('roll-sound');
-    if(rollSound) rollSound.play().catch(() => {}); // Catch error if no sound file
+    if(rollSound) rollSound.play().catch(() => {});
 
+    // Random number 1-6
     diceValue = Math.floor(Math.random() * 6) + 1;
-    document.getElementById('dice-img').src = `images/dice${diceValue}.png`;
+    
+    // Array of Unicode Dice Characters
+    const diceIcons = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    
+    // Update the HTML element
+    const diceElement = document.getElementById('dice-display');
+    diceElement.innerText = diceIcons[diceValue - 1];
     
     hasRolled = true;
     checkPossibleMoves();
@@ -242,3 +249,4 @@ function updateStatus(msg) {
 
 // Start
 initGame();
+
