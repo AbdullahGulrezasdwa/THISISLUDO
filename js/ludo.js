@@ -1,18 +1,4 @@
-// --- PRO SOUND MANAGER ---
-const sfx = {
-    roll: new Audio('sfx/dice-roll.mp3'),
-    move: new Audio('sfx/move.mp3'),
-    capture: new Audio('sfx/capture.mp3'),
-    win: new Audio('sfx/win.mp3')
-};
-
-// Helper function to play sound without overlapping issues
-function playSound(name) {
-    if (sfx[name]) {
-        sfx[name].currentTime = 0; // Rewind to start in case of rapid clicks
-        sfx[name].play().catch(err => console.log("Audio waiting for user interaction."));
-    }
-}
+// --- CONFIGURATION & STATE ---
 const allColors = ['red', 'green', 'yellow', 'blue'];
 const colorFile = { red: 'rd', green: 'gn', yellow: 'yl', blue: 'bl' };
 const startOffsets = { red: 0, green: 13, yellow: 26, blue: 39 };
@@ -23,9 +9,31 @@ let playerNames = {};
 let currentTurnIndex = 0;
 let diceValue = 0;
 let hasRolled = false;
+let isMuted = false;
 let killStatus = { red: false, green: false, yellow: false, blue: false };
 let pieceState = { red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1] };
 
+// --- SOUND MANAGER ---
+const sfx = {
+    roll: new Audio('sfx/dice-roll.mp3'),
+    move: new Audio('sfx/move.mp3'),
+    capture: new Audio('sfx/capture.mp3'),
+    win: new Audio('sfx/win.mp3')
+};
+
+function playSound(name) {
+    if (!isMuted && sfx[name]) {
+        sfx[name].currentTime = 0;
+        sfx[name].play().catch(() => {});
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊";
+}
+
+// --- PATH DATA ---
 const mainPath = [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
 const homePaths = {
     red:    [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
@@ -40,19 +48,17 @@ const baseCoords = {
     blue:   [[10.5, 1.5], [10.5, 3.5], [12.5, 1.5], [12.5, 3.5]]
 };
 
+// --- CORE FUNCTIONS ---
 function toggleNameInputs() {
     const count = parseInt(document.getElementById('player-count').value);
     const container = document.getElementById('name-inputs');
     container.innerHTML = '';
-    if (count === 1) activeColors = ['red'];
-    else if (count === 2) activeColors = ['red', 'yellow']; 
-    else if (count === 3) activeColors = ['red', 'green', 'yellow'];
-    else activeColors = ['red', 'green', 'yellow', 'blue'];
+    activeColors = (count === 1) ? ['red'] : (count === 2) ? ['red', 'yellow'] : (count === 3) ? ['red', 'green', 'yellow'] : ['red', 'green', 'yellow', 'blue'];
 
     activeColors.forEach(color => {
         const input = document.createElement('input');
         input.type = 'text'; input.id = `name-${color}`;
-        input.placeholder = `${color.toUpperCase()} Name`;
+        input.placeholder = `${color.toUpperCase()} Name ${color === 'red' ? "(Try 'codered')" : ""}`;
         container.appendChild(input);
     });
 }
@@ -66,7 +72,6 @@ function startGame() {
     activeColors.forEach(color => {
         playerNames[color] = document.getElementById(`name-${color}`).value || color.toUpperCase();
         
-        // Build Status Dashboard
         const div = document.createElement('div');
         div.id = `stat-${color}`; div.className = 'stat-item';
         div.innerHTML = `${color.toUpperCase()}: <span class="lock">🔒</span>`;
@@ -89,6 +94,7 @@ function startGame() {
 
 function rollDice() {
     if (hasRolled) return;
+    playSound('roll');
     const box = document.getElementById('dice-box');
     box.classList.add('dice-rolling');
     setTimeout(() => {
@@ -107,7 +113,7 @@ function rollDice() {
 function checkPossibleMoves(color) {
     const canMove = pieceState[color].some((p, i) => isValidMove(color, i));
     if (!canMove) {
-        document.getElementById('instruction').innerText = !killStatus[color] ? "Need a kill to enter home!" : "No moves possible!";
+        document.getElementById('instruction').innerText = !killStatus[color] && pieceState[color].some(p => p+diceValue > 51) ? "Need a kill to enter home!" : "No moves possible!";
         setTimeout(nextTurn, 1200);
     } else {
         document.getElementById('instruction').innerText = "Pick a piece!";
@@ -123,20 +129,21 @@ function isValidMove(color, index) {
     if (p >= 57) return false;
     let next = p + diceValue;
     if (next > 57) return false;
-    if (!killStatus[color] && next > 51) return false; // THE KILL RULE
+    if (!killStatus[color] && next > 51) return false; // KILL RULE BARRIER
     return true;
 }
 
 function handlePieceClick(color, index) {
     if (!hasRolled || activeColors[currentTurnIndex] !== color || !isValidMove(color, index)) return;
+    playSound('move');
     hideGhost();
-    let pos = pieceState[color][index];
-    if (pos === -1) pieceState[color][index] = 0;
+    if (pieceState[color][index] === -1) pieceState[color][index] = 0;
     else pieceState[color][index] += diceValue;
     moveResolved(color, pieceState[color][index]);
 }
 
 function moveResolved(color, newPos) {
+    // Capture Logic
     if (newPos < 51) {
         let globalIdx = (newPos + startOffsets[color]) % 52;
         if (!safeSpots.includes(globalIdx)) {
@@ -151,13 +158,19 @@ function moveResolved(color, newPos) {
             });
         }
     }
-    if (pieceState[color].every(p => p === 57)) { alert(playerNames[color] + " WINS!"); location.reload(); }
+    // Win Logic
+    if (pieceState[color].every(p => p === 57)) { 
+        playSound('win');
+        alert(playerNames[color] + " WINS!"); 
+        location.reload(); 
+    }
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('highlight'));
     render();
     if (diceValue !== 6) nextTurn(); else { hasRolled = false; updateUI("Roll again!"); }
 }
 
 function triggerCaptureEffects(color) {
+    playSound('capture');
     killStatus[color] = true;
     document.getElementById('board').classList.add('shake');
     setTimeout(() => document.getElementById('board').classList.remove('shake'), 200);
@@ -184,7 +197,7 @@ function nextTurn() { currentTurnIndex = (currentTurnIndex + 1) % activeColors.l
 function updateUI(msg) {
     const color = activeColors[currentTurnIndex];
     document.querySelectorAll('.stat-item').forEach(s => s.classList.remove('active-player'));
-    document.getElementById(`stat-${color}`).classList.add('active-player');
+    if(document.getElementById(`stat-${color}`)) document.getElementById(`stat-${color}`).classList.add('active-player');
     const sd = document.getElementById('status-display');
     sd.innerText = color.toUpperCase() + "'S TURN";
     sd.style.color = (color === 'yellow') ? '#f1c40f' : color;
@@ -202,4 +215,3 @@ function render() {
         });
     });
 }
-
