@@ -2,45 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ludo Elite - Pro Edition</title>
     <link rel="stylesheet" href="css/StyleSheet.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div class="main-container">
         <div id="setup-screen" class="ui-panel">
-            <h2 style="color: #f1c40f; margin-bottom: 20px;">LUDO ELITE SETUP</h2>
+            <h1 class="glitch-text">LUDO ELITE</h1>
             <div class="setup-group">
-                <label>Number of Players:</label>
+                <label>Total Players</label>
                 <select id="player-count" onchange="toggleNameInputs()">
                     <option value="1">1 Player (Solo)</option>
                     <option value="2" selected>2 Players (Red vs Yellow)</option>
-                    <option value="3">3 Players (Red, Green, Yellow)</option>
-                    <option value="4">4 Players (All Colors)</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
                 </select>
             </div>
             <div id="name-inputs"></div>
-            <button class="start-btn" onclick="startGame()">START GAME</button>
+            <button class="start-btn" onclick="startGame()">ENTER ARENA</button>
         </div>
 
         <div id="game-area" style="display:none;">
-            <div class="status-board" id="status-board">
-                </div>
+            <div class="status-board" id="status-board"></div>
 
-            <div class="game-board" id="board">
-                <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
-                <div id="pieces-container"></div>
+            <div class="game-board-container">
+                <div class="game-board" id="board">
+                    <img src="images/board.jpg" class="board-bg" alt="Board">
+                    <div id="pieces-container"></div>
+                </div>
             </div>
 
-            <div class="ui-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="ui-panel control-panel">
+                <div class="panel-header">
                     <div id="status-display">RED'S TURN</div>
-                    <button id="mute-btn" onclick="toggleMute()" style="background:none; border:none; cursor:pointer; font-size:20px;">🔊</button>
+                    <button id="mute-btn" onclick="toggleMute()">🔊</button>
                 </div>
                 <div id="player-label">Player: ---</div>
                 <div class="dice-section">
                     <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
-                    <p id="instruction">Click Dice to Roll</p>
+                    <p id="instruction">Roll the Dice</p>
                 </div>
             </div>
         </div>
