@@ -3,35 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Pro - Ultimate Edition</title>
+    <title>Ludo Elite - codered Edition</title>
     <link rel="stylesheet" href="css/StyleSheet.css">
 </head>
 <body>
     <div class="main-container">
         <div id="setup-screen" class="ui-panel">
-            <h2>LUDO PRO SETUP</h2>
+            <h2 style="color: #f1c40f; margin-bottom: 20px;">LUDO ELITE SETUP</h2>
             <div class="setup-group">
                 <label>Number of Players:</label>
                 <select id="player-count" onchange="toggleNameInputs()">
-                    <option value="1">1 Player</option>
-                    <option value="2" selected>2 Players</option>
-                    <option value="3">3 Players</option>
-                    <option value="4">4 Players</option>
+                    <option value="1">1 Player (Solo)</option>
+                    <option value="2" selected>2 Players (Red vs Yellow)</option>
+                    <option value="3">3 Players (Red, Green, Yellow)</option>
+                    <option value="4">4 Players (All Colors)</option>
                 </select>
             </div>
             <div id="name-inputs">
-                <input type="text" id="p0-name" placeholder="Red Name (Try 'codered')">
-                <input type="text" id="p1-name" placeholder="Green Name">
-                <input type="text" id="p2-name" placeholder="Yellow Name" style="display:none;">
-                <input type="text" id="p3-name" placeholder="Blue Name" style="display:none;">
-            </div>
+                </div>
             <button class="start-btn" onclick="startGame()">START GAME</button>
         </div>
 
         <div id="game-area" style="display:none;">
             <div class="game-board" id="board">
                 <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
-                
                 <div id="pieces-container"></div>
             </div>
 
@@ -40,7 +35,7 @@
                 <div id="player-label">Player: ---</div>
                 <div class="dice-section">
                     <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
-                    <p id="instruction">Click the Dice to Roll</p>
+                    <p id="instruction">Click Dice to Roll</p>
                 </div>
             </div>
         </div>
