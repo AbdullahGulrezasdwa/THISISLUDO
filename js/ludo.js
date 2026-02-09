@@ -8,7 +8,7 @@ let hasRolled = false, isAnimating = false, isMuted = false;
 let killStatus = { red: false, green: false, yellow: false, blue: false };
 let pieceState = { red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1] };
 
-// SFX Engine
+// SFX Engine with Overlap Support
 const sfx = {
     roll: new Audio('sfx/dice-roll.mp3'),
     move: new Audio('sfx/move.mp3'),
@@ -16,10 +16,19 @@ const sfx = {
     win: new Audio('sfx/win.mp3')
 };
 
-function play(name) { if (!isMuted && sfx[name]) { sfx[name].currentTime = 0; sfx[name].play().catch(()=>{}); } }
+function play(name) { 
+    if (!isMuted && sfx[name]) { 
+        if (name === 'move') {
+            let snap = sfx[name].cloneNode();
+            snap.volume = 0.6; snap.play().catch(()=>{});
+        } else {
+            sfx[name].currentTime = 0; sfx[name].play().catch(()=>{}); 
+        }
+    } 
+}
 function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊"; }
 
-// Coordinates
+// Logic Paths
 const mainPath = [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
 const homePaths = { red:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]], green:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]], yellow:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]], blue:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]] };
 const baseCoords = { red:[[1.5,1.5],[1.5,3.5],[3.5,1.5],[3.5,3.5]], green:[[1.5,10.5],[1.5,12.5],[3.5,10.5],[3.5,12.5]], yellow:[[10.5,10.5],[10.5,12.5],[12.5,10.5],[12.5,12.5]], blue:[[10.5,1.5],[10.5,3.5],[12.5,1.5],[12.5,3.5]] };
@@ -59,6 +68,7 @@ function rollDice() {
     if (hasRolled || isAnimating) return;
     play('roll');
     const box = document.getElementById('dice-box');
+    box.classList.remove('bonus-glow');
     box.classList.add('dice-rolling');
     setTimeout(() => {
         box.classList.remove('dice-rolling');
@@ -73,7 +83,7 @@ function rollDice() {
 function checkMoves(c) {
     const canMove = pieceState[c].some((_, i) => isValid(c, i));
     if (!canMove) {
-        document.getElementById('instruction').innerText = !killStatus[c] && pieceState[c].some(p => p+diceValue > 51) ? "Must kill to enter home!" : "No moves!";
+        document.getElementById('instruction').innerText = !killStatus[c] && pieceState[c].some(p => p+diceValue > 51) ? "Need a kill for home!" : "No moves!";
         setTimeout(nextTurn, 1500);
     } else {
         document.getElementById('instruction').innerText = "Pick a piece!";
@@ -91,38 +101,27 @@ function isValid(c, i) {
 
 async function handleMove(c, i) {
     if (!hasRolled || isAnimating || activeColors[currentTurnIndex] !== c || !isValid(c, i)) return;
-    
-    isAnimating = true; 
-    hideGhost();
+    isAnimating = true; hideGhost();
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('highlight'));
     
     let cur = pieceState[c][i];
-    
     if (cur === -1) { 
-        pieceState[c][i] = 0; 
-        play('move'); 
-        render(); 
-        await new Promise(r => setTimeout(r, 200)); // Entrance jump gets a bit more time
+        pieceState[c][i] = 0; play('move'); render(); 
+        await new Promise(r => setTimeout(r, 200)); 
     } else {
         let target = cur + diceValue;
         for (let s = cur + 1; s <= target; s++) {
-            pieceState[c][i] = s; 
-            play('move'); 
-            render();
-            
-            // 180ms is the "Goldilocks" zone for sfx completion
-            await new Promise(r => setTimeout(r, 180)); 
+            pieceState[c][i] = s; play('move'); render();
+            await new Promise(r => setTimeout(r, 180)); // Precision sync
         }
     }
-    
-    if (pieceState[c][i] === 57) { 
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
-    }
-    
-    isAnimating = false; 
-    resolve(c, pieceState[c][i]);
+    isAnimating = false; resolve(c, pieceState[c][i]);
 }
+
 function resolve(c, pos) {
+    let bonusTurn = false;
+    if (pos === 57) { bonusTurn = true; confetti({ particleCount: 100, spread: 70 }); }
+
     if (pos < 51) {
         let idx = (pos + startOffsets[c]) % 52;
         if (!safeSpots.includes(idx)) {
@@ -131,16 +130,24 @@ function resolve(c, pos) {
                 pieceState[oc].forEach((op, oi) => {
                     if (op !== -1 && op < 51 && (op + startOffsets[oc]) % 52 === idx) {
                         pieceState[oc][oi] = -1; play('capture');
-                        killStatus[c] = true; document.getElementById('board').classList.add('shake');
+                        killStatus[c] = true; bonusTurn = true;
+                        document.getElementById('board').classList.add('shake');
                         setTimeout(() => document.getElementById('board').classList.remove('shake'), 200);
-                        let s = document.getElementById(`stat-${c}`); s.classList.add('unlocked'); s.querySelector('.lock').innerText = '⚔️';
+                        let s = document.getElementById(`stat-${c}`); 
+                        s.classList.add('unlocked'); s.querySelector('.lock').innerText = '⚔️';
                     }
                 });
             });
         }
     }
-    if (pieceState[c].every(p => p === 57)) { play('win'); alert(playerNames[c] + " WINS!"); location.reload(); }
-    if (diceValue !== 6) nextTurn(); else { hasRolled = false; updateUI("Roll again!"); }
+
+    if (pieceState[c].every(p => p === 57)) { play('win'); alert(playerNames[c] + " WINS!"); location.reload(); return; }
+
+    if (diceValue === 6 || bonusTurn) {
+        hasRolled = false; updateUI(bonusTurn ? "BONUS TURN!" : "ROLL AGAIN!");
+    } else {
+        nextTurn();
+    }
 }
 
 function showGhost(c, i) {
@@ -159,13 +166,20 @@ function updateUI(m) {
     const c = activeColors[currentTurnIndex];
     document.querySelectorAll('.stat-item').forEach(s => s.classList.remove('active-player'));
     if(document.getElementById(`stat-${c}`)) document.getElementById(`stat-${c}`).classList.add('active-player');
+    
     const sd = document.getElementById('status-display');
     sd.innerText = c.toUpperCase() + "'S TURN"; sd.style.color = (c === 'yellow') ? '#f1c40f' : c;
     document.getElementById('player-label').innerText = `Player: ${playerNames[c]}`;
     document.getElementById('instruction').innerText = m || "Roll the Dice!";
-    
+
+    const box = document.getElementById('dice-box');
+    if (m === "BONUS TURN!") box.classList.add('bonus-glow');
+
     const tilts = { red: "rotateX(4deg) rotateY(-4deg)", green: "rotateX(-4deg) rotateY(-4deg)", yellow: "rotateX(-4deg) rotateY(4deg)", blue: "rotateX(4deg) rotateY(4deg)" };
-    document.getElementById('board').style.transform = tilts[c] || "none";
+    const board = document.getElementById('board');
+    board.style.transform = tilts[c] || "none";
+    const colors = { red: '#ff4757', green: '#2ed573', yellow: '#ffa502', blue: '#1e90ff' };
+    board.style.boxShadow = `0 0 30px ${colors[c]}`;
 }
 
 function render() {
@@ -178,4 +192,3 @@ function render() {
         });
     });
 }
-
