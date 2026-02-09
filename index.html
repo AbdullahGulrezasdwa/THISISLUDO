@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Elite - codered Edition</title>
+    <title>Ludo Elite - Pro Edition</title>
     <link rel="stylesheet" href="css/StyleSheet.css">
 </head>
 <body>
@@ -19,12 +19,14 @@
                     <option value="4">4 Players (All Colors)</option>
                 </select>
             </div>
-            <div id="name-inputs">
-                </div>
+            <div id="name-inputs"></div>
             <button class="start-btn" onclick="startGame()">START GAME</button>
         </div>
 
         <div id="game-area" style="display:none;">
+            <div class="status-board" id="status-board">
+                </div>
+
             <div class="game-board" id="board">
                 <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
                 <div id="pieces-container"></div>
