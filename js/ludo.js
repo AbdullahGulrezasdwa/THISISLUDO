@@ -111,7 +111,11 @@ async function handleMove(c, i) {
 
 function resolve(c, pos) {
     let bonusTurn = false;
-    if (pos === 57) { bonusTurn = true; confetti(); }
+    
+    if (pos === 57) { 
+        bonusTurn = true; 
+        confetti({ particleCount: 100, spread: 70 }); 
+    }
 
     if (pos < 51) {
         let idx = (pos + startOffsets[c]) % 52;
@@ -119,18 +123,45 @@ function resolve(c, pos) {
             activeColors.forEach(oc => {
                 if (oc === c) return;
                 pieceState[oc].forEach((op, oi) => {
+                    // Check if opponent is on the same global square
                     if (op !== -1 && op < 51 && (op + startOffsets[oc]) % 52 === idx) {
-                        pieceState[oc][oi] = -1; play('capture');
-                        killStatus[c] = true; bonusTurn = true;
-                        document.getElementById(`stat-${c}`).querySelector('.lock').innerText = '⚔️';
+                        
+                        pieceState[oc][oi] = -1; // Send them home in logic
+                        play('capture');
+                        
+                        // --- THE FIX IS HERE ---
+                        render(); // Teleport the piece home VISUALLY immediately
+                        // -----------------------
+
+                        killStatus[c] = true; 
+                        bonusTurn = true; 
+                        
+                        document.getElementById('board').classList.add('shake');
+                        setTimeout(() => document.getElementById('board').classList.remove('shake'), 200);
+                        
+                        let s = document.getElementById(`stat-${c}`); 
+                        if(s) s.querySelector('.lock').innerText = '⚔️';
                     }
                 });
             });
         }
     }
 
-    if (diceValue === 6 || bonusTurn) { hasRolled = false; updateUI("BONUS!"); } 
-    else { nextTurn(); }
+    // Win Check
+    if (pieceState[c].every(p => p === 57)) { 
+        play('win'); 
+        alert(playerNames[c] + " WINS!"); 
+        location.reload(); 
+        return;
+    }
+
+    // Turn Handling
+    if (diceValue === 6 || bonusTurn) {
+        hasRolled = false; 
+        updateUI(bonusTurn ? "BONUS TURN!" : "ROLL AGAIN!");
+    } else {
+        nextTurn();
+    }
 }
 
 function nextTurn() { currentTurnIndex = (currentTurnIndex + 1) % activeColors.length; hasRolled = false; updateUI(); }
@@ -184,4 +215,5 @@ function render() {
 }
 
 function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊"; }
+
 
