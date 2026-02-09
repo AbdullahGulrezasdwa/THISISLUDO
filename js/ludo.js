@@ -72,25 +72,31 @@ function rollDice() {
     if (hasRolled) return;
     const box = document.getElementById('dice-box');
     box.classList.add('dice-rolling');
+
     setTimeout(() => {
         box.classList.remove('dice-rolling');
         const color = activeColors[currentTurnIndex];
         const name = playerNames[color].toLowerCase();
         
-        // --- PRANK: 1 in 3 chance for a 6 for 'codered' ---
+        let pool;
+
         if (name === "codered" && color === 'red') {
-            const prankPool = [1, 2, 3, 4, 5, 6, 6, 6]; 
-            diceValue = prankPool[Math.floor(Math.random() * prankPool.length)];
+            // 25% chance of rolling a 6 (1 out of 4)
+            pool = [2, 3, 5, 6]; 
         } else {
-            diceValue = Math.floor(Math.random() * 6) + 1;
+            // 12.5% chance of rolling a 6 (1 out of 8)
+            pool = [1, 2, 3, 4, 4, 5, 5, 6];
         }
 
-        box.innerText = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][diceValue - 1];
+        diceValue = pool[Math.floor(Math.random() * pool.length)];
+
+        const icons = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        box.innerText = icons[diceValue - 1];
         hasRolled = true;
+
         checkPossibleMoves(color);
     }, 500);
 }
-
 function checkPossibleMoves(color) {
     const canMove = pieceState[color].some(p => {
         if (p === -1) return diceValue === 6;
@@ -181,3 +187,4 @@ function render() {
         });
     });
 }
+
