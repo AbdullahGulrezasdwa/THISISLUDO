@@ -77,3 +77,20 @@ body {
 .dice-container img:active {
     transform: rotate(360deg);
 }
+.dice-box {
+    font-size: 80px;        /* Makes the dice big */
+    line-height: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: 15px;    /* Rounded corners */
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    user-select: none;      /* Prevents highlighting text */
+    color: #333;            /* Dark grey dots */
+}
+
+.dice-box:active {
+    transform: scale(0.95); /* Click effect */
+}
