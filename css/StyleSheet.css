@@ -1,122 +1,73 @@
-:root {
-    --step-size: 6.666%; 
-}
+:root { --step-size: 6.666%; }
 
 body {
-    background-color: #1a252f;
+    background-color: #121212;
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    overflow: hidden;
 }
 
 .main-container {
     width: 95vw;
     max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
 }
 
 .ui-panel {
-    background: #2c3e50;
+    background: #1e1e1e;
     padding: 20px;
     border-radius: 15px;
     text-align: center;
+    border: 1px solid #333;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.setup-group { margin-bottom: 15px; }
-
 #name-inputs input {
-    display: block;
-    width: 90%;
-    margin: 10px auto;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
+    display: block; width: 90%; margin: 10px auto; padding: 12px;
+    border-radius: 6px; border: 1px solid #444; background: #2a2a2a; color: white;
 }
 
 .start-btn {
-    background: #27ae60;
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 18px;
+    background: #e67e22; color: white; padding: 12px 30px;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;
     transition: 0.2s;
 }
 
-.start-btn:hover { background: #2ecc71; }
+.start-btn:hover { background: #d35400; }
 
-.game-board {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1/1;
-    background: #fff;
-    border: 4px solid #34495e;
-}
-
-.board-bg { width: 100%; height: 100%; display: block; }
+.game-board { position: relative; width: 100%; aspect-ratio: 1/1; }
+.board-bg { width: 100%; height: 100%; display: block; border: 2px solid #333; }
 
 .piece {
-    position: absolute;
-    width: var(--step-size);
-    height: var(--step-size);
-    z-index: 100;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute; width: var(--step-size); height: var(--step-size);
+    z-index: 100; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex; justify-content: center; align-items: center;
     cursor: pointer;
 }
 
-.piece img { width: 85%; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4)); }
+.piece img { width: 90%; height: 90%; object-fit: contain; }
 
 .highlight {
-    animation: bounce 0.6s infinite alternate;
-    filter: brightness(1.2) contrast(1.2);
-    z-index: 105;
+    animation: bounce 0.5s infinite alternate;
+    filter: brightness(1.3) drop-shadow(0 0 8px gold);
+    z-index: 200;
 }
 
-@keyframes bounce {
-    from { transform: translateY(0) scale(1); }
-    to { transform: translateY(-8px) scale(1.1); }
-}
+@keyframes bounce { from { transform: scale(1); } to { transform: scale(1.25); } }
 
 .dice-box {
-    width: 80px;
-    height: 80px;
-    background: white;
-    margin: 10px auto;
-    border-radius: 12px;
-    font-size: 60px;
-    line-height: 80px;
-    color: #333;
-    cursor: pointer;
-    box-shadow: 0 5px 0 #bbb, 0 8px 15px rgba(0,0,0,0.3);
+    width: 75px; height: 75px; background: white; margin: 10px auto;
+    border-radius: 12px; font-size: 55px; line-height: 75px; color: #333;
+    cursor: pointer; box-shadow: 0 5px 0 #999;
     user-select: none;
 }
 
 .dice-rolling { animation: spin 0.1s infinite; pointer-events: none; }
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
 #status-display { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
-#player-label { font-size: 14px; color: #bdc3c7; }
-.piece img {
-    width: 90%;
-    height: 90%;
-    object-fit: contain; /* Prevents the image from stretching */
-    display: block;
-    pointer-events: none; /* Makes sure clicks go to the piece div, not the image */
-}
+#player-label { color: #888; margin-bottom: 10px; }
