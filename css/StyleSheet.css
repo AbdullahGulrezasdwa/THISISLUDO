@@ -1,70 +1,115 @@
 :root { 
     --step-size: 6.6666%; 
-    --glass: rgba(255, 255, 255, 0.1);
+    --red: #ff4757; --green: #2ed573; --yellow: #ffa502; --blue: #1e90ff;
+    --glass: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.15);
 }
 
 body {
-    background: #0a0a0c; margin: 0; display: flex; justify-content: center; 
-    align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; 
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0c 100%);
+    margin: 0; display: flex; justify-content: center; align-items: center;
+    height: 100vh; font-family: 'Inter', system-ui, -apple-system, sans-serif; 
     color: white; overflow: hidden;
 }
 
-.main-container { width: 95vw; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+.main-container { 
+    width: 95vw; max-width: 520px; display: flex; flex-direction: column; gap: 12px; 
+}
 
+/* Glassmorphism Panels */
 .ui-panel {
-    background: var(--glass); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
-    padding: 20px; text-align: center;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* The Board Container */
+.game-board-container { 
+    perspective: 1200px; 
+    width: 100%; 
+    aspect-ratio: 1/1; 
 }
 
 .game-board {
-    position: relative; width: 100%; aspect-ratio: 1 / 1; 
-    border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative; width: 100%; height: 100%;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    background: #000;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    overflow: hidden;
 }
 
-.board-bg { width: 100%; height: 100%; display: block; object-fit: contain; }
+.board-bg { 
+    width: 100%; height: 100%; display: block; 
+    filter: contrast(1.1) brightness(0.9);
+}
 
+/* The Pieces - Zero Stretching, Pure Depth */
 .piece {
     position: absolute; 
-    width: var(--step-size); 
-    height: var(--step-size); 
-    aspect-ratio: 1 / 1; /* FORCES 1:1 CIRCLE */
+    width: var(--step-size); height: var(--step-size); 
+    aspect-ratio: 1/1;
     z-index: 100; display: flex; justify-content: center; align-items: center;
-    transition: top 0.18s ease-out, left 0.18s ease-out; /* 180ms SYNC */
+    transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
 }
 
-.piece img { width: 90%; height: 90%; object-fit: contain; }
+.piece img { 
+    width: 88%; height: 88%; 
+    object-fit: contain; 
+    transition: transform 0.2s;
+}
 
+/* Animation for active piece selection */
+.highlight { 
+    z-index: 200;
+    filter: drop-shadow(0 0 12px gold) brightness(1.2);
+    cursor: pointer;
+}
+.highlight img { transform: scale(1.2) translateY(-5px); }
+
+/* Premium Dice Box */
 .dice-box {
-    width: 70px; height: 70px; background: white; margin: 10px auto;
-    border-radius: 12px; font-size: 50px; line-height: 70px; color: #333;
-    cursor: pointer; box-shadow: 0 6px 0 #bbb;
+    width: 75px; height: 75px; 
+    background: white; margin: 10px auto;
+    border-radius: 18px; font-size: 52px; line-height: 75px; color: #1a1a2e;
+    cursor: pointer; 
+    box-shadow: 0 8px 0 #cbd5e0, 0 12px 20px rgba(0,0,0,0.3);
+    transition: all 0.1s active;
 }
 
-.bonus-glow { animation: pulse-gold 0.8s infinite; border: 3px solid gold; }
-@keyframes pulse-gold {
-    0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+.dice-box:active { 
+    transform: translateY(4px); 
+    box-shadow: 0 4px 0 #cbd5e0; 
 }
 
-.dice-rolling { animation: spin 0.1s infinite; }
-@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-
-.stat-item { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 10px; opacity: 0.5; }
-.active-player { opacity: 1; border: 1px solid gold; }
-.unlocked { color: #2ecc71; font-weight: bold; }
-#player-label {
-    margin: 10px 0;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transition: color 0.3s ease; /* Smooth color transition when turn changes */
+.bonus-glow { 
+    animation: neonPulse 1.2s infinite alternate; 
 }
 
-#status-display {
-    font-weight: 800;
-    font-size: 1.4rem;
-    text-transform: uppercase;
+@keyframes neonPulse {
+    from { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px gold; }
+    to { box-shadow: 0 0 10px #fff, 0 0 20px gold, 0 0 40px gold; }
+}
+
+/* Stat Items Layout */
+.status-board { 
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; 
+}
+
+.stat-item { 
+    background: rgba(0, 0, 0, 0.3); 
+    padding: 10px; border-radius: 12px; 
+    border: 1px solid transparent;
+    opacity: 0.4; transition: 0.4s;
+}
+
+.active-player { 
+    opacity: 1; background: rgba(255, 255, 255, 0.1); 
+    transform: translateY(-2px);
 }
