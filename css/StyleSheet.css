@@ -1,182 +1,79 @@
-/* RESET */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-/* BACKGROUND */
 body {
-    background: url(../images/bg.png) center center no-repeat fixed;
-    background-size: cover;
+    background-color: #2c3e50;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
 }
 
-/* PREMIUM OVERLAY */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.65));
-    z-index: -1;
-}
-
-/* MAIN BOARD SCALE */
-#ludo_main {
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 894px;
-    margin: 20px auto;
-    position: relative;
+    max-width: 600px; /* Limits size on desktop */
 }
 
-/* Board wrapper keeps square ratio */
-.board-wrapper {
+.game-board {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1; /* Keeps it square */
+    background-color: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-/* Board image */
-.board-img {
+.board-bg {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
 }
 
-/* 15x15 overlay grid */
-.board-grid {
+.piece {
     position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: repeat(15, 1fr);
-    grid-template-rows: repeat(15, 1fr);
-}
-
-/* Each cell */
-.board-grid .cell {
-    position: relative;
-}
-
-/* Debug outline so you can see the grid */
-.board-grid .cell.debug {
-    outline: 1px solid rgba(0, 0, 0, 0.15);
-}
-
-/* Homes layout – you can tweak positions */
-.homes {
-    position: relative;
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.player_board {
-    width: 48%;
-}
-
-.player_board_white {
-    background: rgba(255,255,255,0.6);
-    backdrop-filter: none; /* remove blur */
-    border-radius: 12px;
-    padding: 10px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-}
-
-.bg-circle {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    background: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Tokens */
-.kati {
-    width: 70%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    display: block;
-}
-
-/* Colors */
-.kati.rd { background: #e53935; }
-.kati.gn { background: #43a047; }
-.kati.bl { background: #1e88e5; }
-.kati.yl { background: #fdd835; }
-
-/* Dice (from earlier message) */
-.ludu_passas {
-    width: 120px;
-    height: 120px;
-    background: #fff;
-    border-radius: 15px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
-    padding: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    width: 6.66%;  /* 1/15th of the board */
+    height: 6.66%;
+    z-index: 10;
+    transition: top 0.3s, left 0.3s;
     cursor: pointer;
-    margin: 20px auto;
-}
-
-.ludu_passas span {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: transparent;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 
-.ludu_passas span.active {
-    background: #000;
+.piece img {
+    width: 80%; /* Slightly smaller than the square so it fits nicely */
+    height: auto;
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
 }
 
-
-
-/* ACTIVE DOTS */
-.ludu_passas[data-chal-count="1"] span:nth-child(5),
-.ludu_passas[data-chal-count="2"] span:nth-child(4),
-.ludu_passas[data-chal-count="2"] span:nth-child(6),
-.ludu_passas[data-chal-count="3"] span:nth-child(1),
-.ludu_passas[data-chal-count="3"] span:nth-child(5),
-.ludu_passas[data-chal-count="3"] span:nth-child(9),
-.ludu_passas[data-chal-count="4"] span:nth-child(1),
-.ludu_passas[data-chal-count="4"] span:nth-child(3),
-.ludu_passas[data-chal-count="4"] span:nth-child(7),
-.ludu_passas[data-chal-count="4"] span:nth-child(9),
-.ludu_passas[data-chal-count="5"] span:nth-child(1),
-.ludu_passas[data-chal-count="5"] span:nth-child(3),
-.ludu_passas[data-chal-count="5"] span:nth-child(5),
-.ludu_passas[data-chal-count="5"] span:nth-child(7),
-.ludu_passas[data-chal-count="5"] span:nth-child(9),
-.ludu_passas[data-chal-count="6"] span:nth-child(1),
-.ludu_passas[data-chal-count="6"] span:nth-child(3),
-.ludu_passas[data-chal-count="6"] span:nth-child(4),
-.ludu_passas[data-chal-count="6"] span:nth-child(6),
-.ludu_passas[data-chal-count="6"] span:nth-child(7),
-.ludu_passas[data-chal-count="6"] span:nth-child(9) {
-    background: #000;
+/* Animation for movable pieces */
+.highlight {
+    animation: bounce 1s infinite;
+    filter: brightness(1.2);
 }
 
-/* PREMIUM DICE ANIMATION */
-@keyframes diceRoll {
-    0% { transform: rotate(0deg) scale(1); }
-    25% { transform: rotate(90deg) scale(1.2); }
-    50% { transform: rotate(180deg) scale(1); }
-    75% { transform: rotate(270deg) scale(1.2); }
-    100% { transform: rotate(360deg) scale(1); }
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
 }
 
-.dice-anim {
-    animation: diceRoll 0.45s ease-in-out;
+.controls {
+    margin-top: 20px;
+    text-align: center;
+    color: white;
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.dice-container img {
+    width: 60px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.dice-container img:active {
+    transform: rotate(360deg);
 }
