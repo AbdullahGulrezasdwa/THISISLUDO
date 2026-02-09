@@ -96,25 +96,27 @@ function renderBoard() {
     });
 }
 
-// --- Dice Logic ---
 function rollDice() {
-    if (hasRolled) return; // Prevent double rolling
+    if (hasRolled) return; 
 
-    const rollSound = document.getElementById('roll-sound');
-    if(rollSound) rollSound.play().catch(() => {});
-
-    // Random number 1-6
     diceValue = Math.floor(Math.random() * 6) + 1;
-    
-    // Array of Unicode Dice Characters
     const diceIcons = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-    
-    // Update the HTML element
-    const diceElement = document.getElementById('dice-display');
-    diceElement.innerText = diceIcons[diceValue - 1];
+    document.getElementById('dice-display').innerText = diceIcons[diceValue - 1];
     
     hasRolled = true;
-    checkPossibleMoves();
+
+    // FORCE SKIP if no pieces can move (e.g., didn't roll a 6 and all pieces in base)
+    const color = players[currentTurn];
+    const canAnyMove = pieceState[color].some((pos) => isValidMove(pos, diceValue));
+
+    if (!canAnyMove) {
+        setTimeout(() => {
+            alert("No moves possible! Passing turn...");
+            nextTurn();
+        }, 1000);
+    } else {
+        checkPossibleMoves();
+    }
 }
 
 // --- Move Logic ---
@@ -249,4 +251,5 @@ function updateStatus(msg) {
 
 // Start
 initGame();
+
 
