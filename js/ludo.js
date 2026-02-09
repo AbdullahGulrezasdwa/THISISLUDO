@@ -91,24 +91,37 @@ function isValid(c, i) {
 
 async function handleMove(c, i) {
     if (!hasRolled || isAnimating || activeColors[currentTurnIndex] !== c || !isValid(c, i)) return;
-    isAnimating = true; hideGhost();
+    
+    isAnimating = true; 
+    hideGhost();
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('highlight'));
     
     let cur = pieceState[c][i];
+    
     if (cur === -1) { 
-        pieceState[c][i] = 0; play('move'); render(); 
+        pieceState[c][i] = 0; 
+        play('move'); 
+        render(); 
+        await new Promise(r => setTimeout(r, 200)); // Entrance jump gets a bit more time
     } else {
         let target = cur + diceValue;
         for (let s = cur + 1; s <= target; s++) {
-            pieceState[c][i] = s; play('move'); render();
-            await new Promise(r => setTimeout(r, 200));
+            pieceState[c][i] = s; 
+            play('move'); 
+            render();
+            
+            // 180ms is the "Goldilocks" zone for sfx completion
+            await new Promise(r => setTimeout(r, 180)); 
         }
     }
     
-    if (pieceState[c][i] === 57) { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
-    isAnimating = false; resolve(c, pieceState[c][i]);
+    if (pieceState[c][i] === 57) { 
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+    }
+    
+    isAnimating = false; 
+    resolve(c, pieceState[c][i]);
 }
-
 function resolve(c, pos) {
     if (pos < 51) {
         let idx = (pos + startOffsets[c]) % 52;
@@ -165,3 +178,4 @@ function render() {
         });
     });
 }
+
