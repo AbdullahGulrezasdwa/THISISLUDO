@@ -3,47 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Game</title>
+    <title>Ludo Pro - Ultimate Edition</title>
     <link rel="stylesheet" href="css/StyleSheet.css">
 </head>
 <body>
-
     <div class="main-container">
         <div class="game-board" id="board">
             <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
             
-            <div class="piece red" id="r0" data-color="red" data-index="0" onclick="handlePieceClick('red', 0)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r1" data-color="red" data-index="1" onclick="handlePieceClick('red', 1)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r2" data-color="red" data-index="2" onclick="handlePieceClick('red', 2)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r3" data-color="red" data-index="3" onclick="handlePieceClick('red', 3)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r0" onclick="handlePieceClick('red', 0)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r1" onclick="handlePieceClick('red', 1)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r2" onclick="handlePieceClick('red', 2)"><img src="images/rd_kati.png"></div>
+            <div class="piece red" id="r3" onclick="handlePieceClick('red', 3)"><img src="images/rd_kati.png"></div>
 
-            <div class="piece green" id="g0" data-color="green" data-index="0" onclick="handlePieceClick('green', 0)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g1" data-color="green" data-index="1" onclick="handlePieceClick('green', 1)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g2" data-color="green" data-index="2" onclick="handlePieceClick('green', 2)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g3" data-color="green" data-index="3" onclick="handlePieceClick('green', 3)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g0" onclick="handlePieceClick('green', 0)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g1" onclick="handlePieceClick('green', 1)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g2" onclick="handlePieceClick('green', 2)"><img src="images/gn_kati.png"></div>
+            <div class="piece green" id="g3" onclick="handlePieceClick('green', 3)"><img src="images/gn_kati.png"></div>
 
-            <div class="piece yellow" id="y0" data-color="yellow" data-index="0" onclick="handlePieceClick('yellow', 0)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y1" data-color="yellow" data-index="1" onclick="handlePieceClick('yellow', 1)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y2" data-color="yellow" data-index="2" onclick="handlePieceClick('yellow', 2)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y3" data-color="yellow" data-index="3" onclick="handlePieceClick('yellow', 3)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y0" onclick="handlePieceClick('yellow', 0)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y1" onclick="handlePieceClick('yellow', 1)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y2" onclick="handlePieceClick('yellow', 2)"><img src="images/yl_kati.png"></div>
+            <div class="piece yellow" id="y3" onclick="handlePieceClick('yellow', 3)"><img src="images/yl_kati.png"></div>
 
-            <div class="piece blue" id="b0" data-color="blue" data-index="0" onclick="handlePieceClick('blue', 0)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b1" data-color="blue" data-index="1" onclick="handlePieceClick('blue', 1)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b2" data-color="blue" data-index="2" onclick="handlePieceClick('blue', 2)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b3" data-color="blue" data-index="3" onclick="handlePieceClick('blue', 3)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b0" onclick="handlePieceClick('blue', 0)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b1" onclick="handlePieceClick('blue', 1)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b2" onclick="handlePieceClick('blue', 2)"><img src="images/bl_kati.png"></div>
+            <div class="piece blue" id="b3" onclick="handlePieceClick('blue', 3)"><img src="images/bl_kati.png"></div>
         </div>
 
-        <div class="controls">
-            <h2 id="turn-text" style="color: red;">Red's Turn</h2>
-            <div class="dice-container" onclick="rollDice()">
-        <div id="dice-display" class="dice-box">⚀</div>
+        <div class="ui-panel">
+            <div id="status-display">RED'S TURN</div>
+            <div class="dice-section">
+                <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
+                <p id="instruction">Click Dice to Roll</p>
             </div>
-            <p>Click Dice to Roll</p>
         </div>
     </div>
-
-    <audio id="roll-sound" src="roll.mp3"></audio>
-
     <script src="js/ludo.js"></script>
 </body>
 </html>
