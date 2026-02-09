@@ -23,72 +23,95 @@ body::after {
 
 /* MAIN BOARD SCALE */
 #ludo_main {
-    width: 894px;
-    max-width: 100%;
-    margin: 40px auto;
+    width: 100%;
+    max-width: 894px;
+    margin: 20px auto;
     position: relative;
-    /* remove any transform/scale you had before */
-    transform: none;
 }
 
-/* PLAYER HOMES */
-.player_board {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(6px);
-    padding: 28px;
-    border-radius: 12px;
-    box-shadow: 0 0 18px rgba(0,0,0,0.35);
+/* Board wrapper keeps square ratio */
+.board-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
 }
 
-/* TOKEN CIRCLES */
-.bg-circle {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #fff;
+/* Board image */
+.board-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 15x15 overlay grid */
+.board-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+}
+
+/* Each cell */
+.board-grid .cell {
     position: relative;
+}
+
+/* Debug outline so you can see the grid */
+.board-grid .cell.debug {
+    outline: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Homes layout – you can tweak positions */
+.homes {
+    position: relative;
+    margin-top: 10px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.player_board {
+    width: 48%;
+}
+
+.player_board_white {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: none; /* remove blur */
+    border-radius: 12px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.bg-circle {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
     align-items: center;
+    justify-content: center;
 }
 
-/* TOKENS */
+/* Tokens */
 .kati {
-    width: 32px;
-    height: 32px;
-    background-size: 70%;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: transform 0.25s ease;
+    width: 70%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    display: block;
 }
 
-.kati:hover {
-    transform: scale(1.25);
-}
+/* Colors */
+.kati.rd { background: #e53935; }
+.kati.gn { background: #43a047; }
+.kati.bl { background: #1e88e5; }
+.kati.yl { background: #fdd835; }
 
-/* TOKEN COLORS */
-.kati.rd { background-image: url(../images/rd_kati.png); }
-.kati.gn { background-image: url(../images/gn_kati.png); }
-.kati.bl { background-image: url(../images/bl_kati.png); }
-.kati.yl { background-image: url(../images/yl_kati.png); }
-
-/* PATH CELLS */
-.column {
-    width: 34px;
-    height: 34px;
-    background: rgba(255,255,255,0.85);
-    border-radius: 6px;
-    margin: 1px;
-    position: relative;
-    transition: box-shadow 0.2s ease;
-}
-
-.column.safe {
-    background: #00c8ff;
-    box-shadow: 0 0 10px #00c8ff;
-}
-
-/* DICE CONTAINER */
+/* Dice (from earlier message) */
 .ludu_passas {
     width: 120px;
     height: 120px;
@@ -101,11 +124,9 @@ body::after {
     padding: 15px;
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     cursor: pointer;
-    position: relative;
-    z-index: 10;
+    margin: 20px auto;
 }
 
-/* DICE DOTS */
 .ludu_passas span {
     width: 100%;
     height: 100%;
@@ -116,10 +137,10 @@ body::after {
     justify-content: center;
 }
 
-/* ACTIVE DOT */
 .ludu_passas span.active {
     background: #000;
 }
+
 
 
 /* ACTIVE DOTS */
