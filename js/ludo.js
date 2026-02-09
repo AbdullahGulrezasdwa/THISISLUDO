@@ -1,39 +1,126 @@
-// ... existing constants ...
-let killStatus = { red: false, green: false, yellow: false, blue: false }; // NEW: Track kills
+const allColors = ['red', 'green', 'yellow', 'blue'];
+const colorFile = { red: 'rd', green: 'gn', yellow: 'yl', blue: 'bl' };
+const startOffsets = { red: 0, green: 13, yellow: 26, blue: 39 };
+const safeSpots = [0, 8, 13, 21, 26, 34, 39, 47];
 
-// Update checkPossibleMoves to enforce the barrier
-function checkPossibleMoves(color) {
-    const canMove = pieceState[color].some((p, i) => {
-        if (p === -1) return diceValue === 6;
-        if (p >= 57) return false;
-        
-        let nextPos = p + diceValue;
-        // RULE: If haven't killed, cannot move past position 51 (the entry square)
-        if (!killStatus[color] && nextPos > 51) return false;
-        if (nextPos > 57) return false;
-        return true;
+let activeColors = []; 
+let playerNames = {}; 
+let currentTurnIndex = 0;
+let diceValue = 0;
+let hasRolled = false;
+let killStatus = { red: false, green: false, yellow: false, blue: false };
+let pieceState = { red: [-1,-1,-1,-1], green: [-1,-1,-1,-1], yellow: [-1,-1,-1,-1], blue: [-1,-1,-1,-1] };
+
+const mainPath = [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
+const homePaths = {
+    red:    [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
+    green:  [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],
+    yellow: [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
+    blue:   [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]]
+};
+const baseCoords = {
+    red:    [[1.5, 1.5], [1.5, 3.5], [3.5, 1.5], [3.5, 3.5]],
+    green:  [[1.5, 10.5], [1.5, 12.5], [3.5, 10.5], [3.5, 12.5]],
+    yellow: [[10.5, 10.5], [10.5, 12.5], [12.5, 10.5], [12.5, 12.5]],
+    blue:   [[10.5, 1.5], [10.5, 3.5], [12.5, 1.5], [12.5, 3.5]]
+};
+
+function toggleNameInputs() {
+    const count = parseInt(document.getElementById('player-count').value);
+    const container = document.getElementById('name-inputs');
+    container.innerHTML = '';
+    if (count === 1) activeColors = ['red'];
+    else if (count === 2) activeColors = ['red', 'yellow']; 
+    else if (count === 3) activeColors = ['red', 'green', 'yellow'];
+    else activeColors = ['red', 'green', 'yellow', 'blue'];
+
+    activeColors.forEach(color => {
+        const input = document.createElement('input');
+        input.type = 'text'; input.id = `name-${color}`;
+        input.placeholder = `${color.toUpperCase()} Name`;
+        container.appendChild(input);
     });
-    
+}
+toggleNameInputs();
+
+function startGame() {
+    const container = document.getElementById('pieces-container');
+    const boardStat = document.getElementById('status-board');
+    container.innerHTML = ''; boardStat.innerHTML = '';
+
+    activeColors.forEach(color => {
+        playerNames[color] = document.getElementById(`name-${color}`).value || color.toUpperCase();
+        
+        // Build Status Dashboard
+        const div = document.createElement('div');
+        div.id = `stat-${color}`; div.className = 'stat-item';
+        div.innerHTML = `${color.toUpperCase()}: <span class="lock">🔒</span>`;
+        boardStat.appendChild(div);
+
+        for (let j = 0; j < 4; j++) {
+            const p = document.createElement('div');
+            p.className = `piece ${color}`; p.id = `${color[0]}${j}`;
+            p.onclick = () => handlePieceClick(color, j);
+            p.onmouseenter = () => showGhost(color, j);
+            p.onmouseleave = () => hideGhost();
+            p.innerHTML = `<img src="images/${colorFile[color]}_kati.png" onerror="this.src='https://via.placeholder.com/30?text=P'">`;
+            container.appendChild(p);
+        }
+    });
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'block';
+    render(); updateUI();
+}
+
+function rollDice() {
+    if (hasRolled) return;
+    const box = document.getElementById('dice-box');
+    box.classList.add('dice-rolling');
+    setTimeout(() => {
+        box.classList.remove('dice-rolling');
+        const color = activeColors[currentTurnIndex];
+        const name = playerNames[color].toLowerCase();
+        let pool = (name === "codered" && color === 'red') ? [2,3,5,6] : [1,2,3,4,4,5,5,6];
+        diceValue = pool[Math.floor(Math.random() * pool.length)];
+        const icons = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        box.innerText = icons[diceValue - 1];
+        hasRolled = true;
+        checkPossibleMoves(color);
+    }, 400);
+}
+
+function checkPossibleMoves(color) {
+    const canMove = pieceState[color].some((p, i) => isValidMove(color, i));
     if (!canMove) {
-        let msg = !killStatus[color] && pieceState[color].some(p => p + diceValue > 51) 
-                  ? "Need a kill to enter home!" 
-                  : "No moves possible!";
-        document.getElementById('instruction').innerText = msg;
-        setTimeout(nextTurn, 1500);
+        document.getElementById('instruction').innerText = !killStatus[color] ? "Need a kill to enter home!" : "No moves possible!";
+        setTimeout(nextTurn, 1200);
     } else {
         document.getElementById('instruction').innerText = "Pick a piece!";
         pieceState[color].forEach((p, i) => {
-            let nextPos = p + diceValue;
-            let canEnter = killStatus[color] || nextPos <= 51; // Check rule
-            
-            if ((p === -1 && diceValue === 6) || (p !== -1 && nextPos <= 57 && canEnter)) {
-                document.getElementById(`${color[0]}${i}`).classList.add('highlight');
-            }
+            if (isValidMove(color, i)) document.getElementById(`${color[0]}${i}`).classList.add('highlight');
         });
     }
 }
 
-// Update moveResolved to trigger the kill status
+function isValidMove(color, index) {
+    let p = pieceState[color][index];
+    if (p === -1) return diceValue === 6;
+    if (p >= 57) return false;
+    let next = p + diceValue;
+    if (next > 57) return false;
+    if (!killStatus[color] && next > 51) return false; // THE KILL RULE
+    return true;
+}
+
+function handlePieceClick(color, index) {
+    if (!hasRolled || activeColors[currentTurnIndex] !== color || !isValidMove(color, index)) return;
+    hideGhost();
+    let pos = pieceState[color][index];
+    if (pos === -1) pieceState[color][index] = 0;
+    else pieceState[color][index] += diceValue;
+    moveResolved(color, pieceState[color][index]);
+}
+
 function moveResolved(color, newPos) {
     if (newPos < 51) {
         let globalIdx = (newPos + startOffsets[color]) % 52;
@@ -41,30 +128,62 @@ function moveResolved(color, newPos) {
             activeColors.forEach(pColor => {
                 if (pColor === color) return;
                 pieceState[pColor].forEach((otherPos, i) => {
-                    if (otherPos !== -1 && otherPos < 51) {
-                        if ((otherPos + startOffsets[pColor]) % 52 === globalIdx) {
-                            pieceState[pColor][i] = -1;
-                            
-                            // RULE TRIGGERED: Player earned their home entry
-                            if (!killStatus[color]) {
-                                killStatus[color] = true;
-                                notifyKill(color);
-                            }
-                        }
+                    if (otherPos !== -1 && otherPos < 51 && (otherPos + startOffsets[pColor]) % 52 === globalIdx) {
+                        pieceState[pColor][i] = -1;
+                        triggerCaptureEffects(color);
                     }
                 });
             });
         }
     }
-    // ... rest of your win check ...
+    if (pieceState[color].every(p => p === 57)) { alert(playerNames[color] + " WINS!"); location.reload(); }
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('highlight'));
     render();
     if (diceValue !== 6) nextTurn(); else { hasRolled = false; updateUI("Roll again!"); }
 }
 
-function notifyKill(color) {
-    const display = document.getElementById('instruction');
-    display.innerText = "KILL CONFIRMED! Home Path Unlocked!";
-    display.style.color = "#2ecc71";
-    setTimeout(() => { display.style.color = "white"; }, 2000);
+function triggerCaptureEffects(color) {
+    killStatus[color] = true;
+    document.getElementById('board').classList.add('shake');
+    setTimeout(() => document.getElementById('board').classList.remove('shake'), 200);
+    const stat = document.getElementById(`stat-${color}`);
+    stat.classList.add('unlocked');
+    stat.querySelector('.lock').innerText = '⚔️';
+}
+
+function showGhost(color, index) {
+    if (!hasRolled || activeColors[currentTurnIndex] !== color || !isValidMove(color, index)) return;
+    let futurePos = pieceState[color][index] === -1 ? 0 : pieceState[color][index] + diceValue;
+    let coords = futurePos < 52 ? mainPath[(futurePos + startOffsets[color]) % 52] : homePaths[color][futurePos - 52];
+    const g = document.createElement('div');
+    g.id = 'ghost'; g.className = `piece ${color} ghost`;
+    g.style.top = (coords[0] * 6.666) + "%"; g.style.left = (coords[1] * 6.666) + "%";
+    g.innerHTML = `<img src="images/${colorFile[color]}_kati.png">`;
+    document.getElementById('board').appendChild(g);
+}
+
+function hideGhost() { const g = document.getElementById('ghost'); if (g) g.remove(); }
+
+function nextTurn() { currentTurnIndex = (currentTurnIndex + 1) % activeColors.length; hasRolled = false; updateUI(); }
+
+function updateUI(msg) {
+    const color = activeColors[currentTurnIndex];
+    document.querySelectorAll('.stat-item').forEach(s => s.classList.remove('active-player'));
+    document.getElementById(`stat-${color}`).classList.add('active-player');
+    const sd = document.getElementById('status-display');
+    sd.innerText = color.toUpperCase() + "'S TURN";
+    sd.style.color = (color === 'yellow') ? '#f1c40f' : color;
+    document.getElementById('player-label').innerText = `Player: ${playerNames[color]}`;
+    document.getElementById('instruction').innerText = msg || "Roll the Dice!";
+}
+
+function render() {
+    activeColors.forEach(color => {
+        pieceState[color].forEach((pos, i) => {
+            const el = document.getElementById(`${color[0]}${i}`);
+            let coords = pos === -1 ? baseCoords[color][i] : (pos < 52 ? mainPath[(pos + startOffsets[color]) % 52] : homePaths[color][pos - 52]);
+            el.style.top = (coords[0] * 6.666) + "%"; el.style.left = (coords[1] * 6.666) + "%";
+            el.style.opacity = pos === 57 ? "0.3" : "1";
+        });
+    });
 }
