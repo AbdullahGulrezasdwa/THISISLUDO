@@ -1,3 +1,18 @@
+// --- PRO SOUND MANAGER ---
+const sfx = {
+    roll: new Audio('sfx/dice-roll.mp3'),
+    move: new Audio('sfx/move.mp3'),
+    capture: new Audio('sfx/capture.mp3'),
+    win: new Audio('sfx/win.mp3')
+};
+
+// Helper function to play sound without overlapping issues
+function playSound(name) {
+    if (sfx[name]) {
+        sfx[name].currentTime = 0; // Rewind to start in case of rapid clicks
+        sfx[name].play().catch(err => console.log("Audio waiting for user interaction."));
+    }
+}
 const allColors = ['red', 'green', 'yellow', 'blue'];
 const colorFile = { red: 'rd', green: 'gn', yellow: 'yl', blue: 'bl' };
 const startOffsets = { red: 0, green: 13, yellow: 26, blue: 39 };
@@ -187,3 +202,4 @@ function render() {
         });
     });
 }
+
