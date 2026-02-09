@@ -33,7 +33,10 @@
             </div>
 
             <div class="ui-panel">
-                <div id="status-display">RED'S TURN</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div id="status-display">RED'S TURN</div>
+                    <button id="mute-btn" onclick="toggleMute()" style="background:none; border:none; cursor:pointer; font-size:20px;">🔊</button>
+                </div>
                 <div id="player-label">Player: ---</div>
                 <div class="dice-section">
                     <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
