@@ -137,10 +137,39 @@ function nextTurn() { currentTurnIndex = (currentTurnIndex + 1) % activeColors.l
 
 function updateUI(m) {
     const c = activeColors[currentTurnIndex];
+    const name = playerNames[c] || c.toUpperCase(); // Get the custom name or color name
+
+    // 1. Update the Status Display (The big text)
+    const sd = document.getElementById('status-display');
+    sd.innerText = name + "'S TURN"; 
+    
+    // Set color based on active player
+    const colors = { red: '#ff4757', green: '#2ed573', yellow: '#ffa502', blue: '#1e90ff' };
+    sd.style.color = colors[c];
+
+    // 2. Update the Player Label (Above the dice)
+    const pl = document.getElementById('player-label');
+    pl.innerText = `Player: ${name}`;
+    pl.style.color = colors[c]; // This adds the missing color to the name
+    pl.style.fontWeight = "bold";
+
+    // 3. Highlight the Stat Board item
     document.querySelectorAll('.stat-item').forEach(s => s.classList.remove('active-player'));
-    if(document.getElementById(`stat-${c}`)) document.getElementById(`stat-${c}`).classList.add('active-player');
-    document.getElementById('status-display').innerText = c.toUpperCase() + "'S TURN";
-    if (m === "BONUS!") document.getElementById('dice-box').classList.add('bonus-glow');
+    const statEl = document.getElementById(`stat-${c}`);
+    if(statEl) statEl.classList.add('active-player');
+
+    // 4. Instructions and Dice Glow
+    document.getElementById('instruction').innerText = m || "Roll the Dice!";
+    const box = document.getElementById('dice-box');
+    if (m === "BONUS TURN!" || m === "ROLL AGAIN!") {
+        box.classList.add('bonus-glow');
+    } else {
+        box.classList.remove('bonus-glow');
+    }
+
+    // 5. Board Tilt/Glow
+    const board = document.getElementById('board');
+    board.style.boxShadow = `0 0 40px ${colors[c]}`;
 }
 
 function render() {
@@ -155,3 +184,4 @@ function render() {
 }
 
 function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊"; }
+
