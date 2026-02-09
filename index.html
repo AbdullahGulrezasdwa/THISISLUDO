@@ -8,35 +8,40 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="game-board" id="board">
-            <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
-            
-            <div class="piece red" id="r0" onclick="handlePieceClick('red', 0)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r1" onclick="handlePieceClick('red', 1)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r2" onclick="handlePieceClick('red', 2)"><img src="images/rd_kati.png"></div>
-            <div class="piece red" id="r3" onclick="handlePieceClick('red', 3)"><img src="images/rd_kati.png"></div>
-
-            <div class="piece green" id="g0" onclick="handlePieceClick('green', 0)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g1" onclick="handlePieceClick('green', 1)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g2" onclick="handlePieceClick('green', 2)"><img src="images/gn_kati.png"></div>
-            <div class="piece green" id="g3" onclick="handlePieceClick('green', 3)"><img src="images/gn_kati.png"></div>
-
-            <div class="piece yellow" id="y0" onclick="handlePieceClick('yellow', 0)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y1" onclick="handlePieceClick('yellow', 1)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y2" onclick="handlePieceClick('yellow', 2)"><img src="images/yl_kati.png"></div>
-            <div class="piece yellow" id="y3" onclick="handlePieceClick('yellow', 3)"><img src="images/yl_kati.png"></div>
-
-            <div class="piece blue" id="b0" onclick="handlePieceClick('blue', 0)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b1" onclick="handlePieceClick('blue', 1)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b2" onclick="handlePieceClick('blue', 2)"><img src="images/bl_kati.png"></div>
-            <div class="piece blue" id="b3" onclick="handlePieceClick('blue', 3)"><img src="images/bl_kati.png"></div>
+        <div id="setup-screen" class="ui-panel">
+            <h2>LUDO PRO SETUP</h2>
+            <div class="setup-group">
+                <label>Number of Players:</label>
+                <select id="player-count" onchange="toggleNameInputs()">
+                    <option value="1">1 Player</option>
+                    <option value="2" selected>2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                </select>
+            </div>
+            <div id="name-inputs">
+                <input type="text" id="p0-name" placeholder="Red Name (Try 'codered')">
+                <input type="text" id="p1-name" placeholder="Green Name">
+                <input type="text" id="p2-name" placeholder="Yellow Name" style="display:none;">
+                <input type="text" id="p3-name" placeholder="Blue Name" style="display:none;">
+            </div>
+            <button class="start-btn" onclick="startGame()">START GAME</button>
         </div>
 
-        <div class="ui-panel">
-            <div id="status-display">RED'S TURN</div>
-            <div class="dice-section">
-                <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
-                <p id="instruction">Click Dice to Roll</p>
+        <div id="game-area" style="display:none;">
+            <div class="game-board" id="board">
+                <img src="images/board.jpg" class="board-bg" alt="Ludo Board">
+                
+                <div id="pieces-container"></div>
+            </div>
+
+            <div class="ui-panel">
+                <div id="status-display">RED'S TURN</div>
+                <div id="player-label">Player: ---</div>
+                <div class="dice-section">
+                    <div id="dice-box" class="dice-box" onclick="rollDice()">⚀</div>
+                    <p id="instruction">Click the Dice to Roll</p>
+                </div>
             </div>
         </div>
     </div>
