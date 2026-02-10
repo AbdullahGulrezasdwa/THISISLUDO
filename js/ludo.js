@@ -75,7 +75,12 @@ async function rollDice() {
     box.classList.remove('dice-rolling');
     
     const color = gameState.activeColors[gameState.turnIndex];
-    const pool = gameState.playerNames[color].toLowerCase() === "codered" ? [2,3,5,6] : [1,2,3,4,5,6];
+
+    // ⭐ UPDATED CHEAT FOR "Abdullah"
+    const pool = gameState.playerNames[color].toLowerCase() === "abdullah"
+        ? [1,2,3,4,5,5,6,6]
+        : [1,2,3,4,5,6];
+
     gameState.diceValue = pool[Math.floor(Math.random() * pool.length)];
     box.innerText = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][gameState.diceValue - 1];
     gameState.hasRolled = true;
