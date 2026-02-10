@@ -18,6 +18,39 @@ let gameState = {
     isMuted: false
 };
 
+// --- AUDIO SYSTEM ---
+const SFX = {
+    roll: new Audio('sfx/dice-roll.mp3'),
+    move: new Audio('sfx/move.mp3'),
+    capture: new Audio('sfx/capture.mp3'),
+    win: new Audio('sfx/win.mp3')
+};
+
+// Unlocks audio for mobile/modern browsers on first click
+function unlockAudio() {
+    Object.values(SFX).forEach(sound => {
+        sound.load();
+        sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+        }).catch(() => {});
+    });
+    document.removeEventListener('click', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+
+function playSound(sound) {
+    if (!gameState.isMuted && SFX[sound]) {
+        SFX[sound].currentTime = 0;
+        SFX[sound].play().catch(e => console.warn("Audio blocked:", e));
+    }
+}
+
+function toggleMute() {
+    gameState.isMuted = !gameState.isMuted;
+    document.getElementById('mute-btn').innerText = gameState.isMuted ? '🔇' : '🔊';
+}
+
 const GRID = {
     main: [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]],
     home: { red:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]], green:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]], yellow:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]], blue:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]] },
@@ -59,7 +92,6 @@ function createPieces(color) {
         const img = document.createElement('img');
         img.src = `images/${CONFIG.FILES[color]}_kati.png`;
         img.onerror = function() {
-            this.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
             this.style.background = color; this.style.borderRadius = "50%";
         };
         p.appendChild(img);
@@ -69,14 +101,14 @@ function createPieces(color) {
 
 async function rollDice() {
     if (gameState.hasRolled || gameState.isAnimating) return;
+    
+    playSound('roll');
     const box = document.getElementById('dice-box');
     box.classList.add('dice-rolling');
     await new Promise(r => setTimeout(r, 500));
     box.classList.remove('dice-rolling');
     
     const color = gameState.activeColors[gameState.turnIndex];
-
-    // ⭐ UPDATED CHEAT FOR "Abdullah"
     const pool = gameState.playerNames[color].toLowerCase() === "abdullah"
         ? [1,2,3,4,5,5,6,6]
         : [1,2,3,4,5,6];
@@ -106,12 +138,15 @@ async function handleMove(c, i) {
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('highlight'));
     
     if (gameState.pieceState[c][i] === -1) {
+        playSound('move');
         gameState.pieceState[c][i] = 0; render();
         await new Promise(r => setTimeout(r, 200));
     } else {
         const target = gameState.pieceState[c][i] + gameState.diceValue;
         for (let s = gameState.pieceState[c][i] + 1; s <= target; s++) {
-            gameState.pieceState[c][i] = s; render();
+            gameState.pieceState[c][i] = s; 
+            render();
+            playSound('move');
             await new Promise(r => setTimeout(r, CONFIG.ANIM_SPEED));
         }
     }
@@ -121,13 +156,19 @@ async function handleMove(c, i) {
 
 function resolve(c, pos) {
     let bonus = false;
-    if (pos === 57) { bonus = true; confetti(); }
+    if (pos === 57) { 
+        bonus = true; 
+        confetti(); 
+        playSound('win');
+    }
+    
     if (pos < 51 && !CONFIG.SAFE_SPOTS.includes((pos + CONFIG.OFFSETS[c]) % 52)) {
         const gIdx = (pos + CONFIG.OFFSETS[c]) % 52;
         gameState.activeColors.forEach(oc => {
             if (oc === c) return;
             gameState.pieceState[oc].forEach((op, oi) => {
                 if (op !== -1 && op < 51 && (op + CONFIG.OFFSETS[oc]) % 52 === gIdx) {
+                    playSound('capture');
                     gameState.pieceState[oc][oi] = -1;
                     gameState.killStatus[c] = true; bonus = true;
                     document.getElementById('board').classList.add('shake');
@@ -158,7 +199,7 @@ function updateUI(m) {
     const colors = { red: '#ff4757', green: '#2ed573', yellow: '#ffa502', blue: '#1e90ff' };
     const name = gameState.playerNames[c];
     
-    document.getElementById('status-display').innerText = name + "'S TURN";
+    document.getElementById('status-display').innerText = m || (name + "'S TURN");
     document.getElementById('status-display').style.color = colors[c];
     document.getElementById('player-label').innerText = "Player: " + name;
     document.getElementById('player-label').style.color = colors[c];
